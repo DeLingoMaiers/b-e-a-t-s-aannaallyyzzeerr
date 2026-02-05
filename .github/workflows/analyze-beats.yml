@@ -1,0 +1,40 @@
+name: Analyze Beats
+
+on:
+  workflow_dispatch:
+    inputs:
+      track_url:
+        description: 'URL аудиотрека'
+        required: true
+      callback_url:
+        description: 'n8n Webhook URL для ответа'
+        required: true
+      job_id:
+        description: 'ID задачи для связки'
+        required: true
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          pip install librosa numpy requests soundfile
+      
+      - name: Analyze beats and send result
+        env:
+          TRACK_URL: ${{ inputs.track_url }}
+          CALLBACK_URL: ${{ inputs.callback_url }}
+          JOB_ID: ${{ inputs.job_id }}
+        run: |
+          python analyze.py
